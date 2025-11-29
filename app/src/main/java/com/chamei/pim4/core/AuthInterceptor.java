@@ -11,7 +11,7 @@ import okhttp3.Response;
 /**
  * Anexa o bearer token salvo pelo SessionManager em cada requisição autenticada.
  */
-public class AuthInterceptor implements Interceptor {
+public class    AuthInterceptor implements Interceptor {
     private final SessionManager sessionManager;
 
     public AuthInterceptor(SessionManager sessionManager) {

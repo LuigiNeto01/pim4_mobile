@@ -17,7 +17,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:5132\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://ec14e6744283.ngrok-free.app/\"")
         buildConfigField("boolean", "DEBUG_LOGIN", "false")
     }
 
@@ -32,6 +32,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

@@ -1,16 +1,20 @@
 package com.chamei.pim4.ui;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.chamei.pim4.R;
 import com.chamei.pim4.core.ApiClient;
 import com.chamei.pim4.core.SessionManager;
 import com.chamei.pim4.databinding.ActivityUsersBinding;
@@ -41,15 +45,65 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
         setContentView(binding.getRoot());
 
         session = new SessionManager(this);
+        String role = session.getUserRole() == null ? "" : session.getUserRole().toLowerCase();
+        if (!role.contains("admin")) {
+            Ui.toast(this, "Apenas admin pode gerir usuários");
+            finish();
+            return;
+        }
+
         usersApi = ApiClient.get(this).create(UsersApi.class);
         adapter = new UserAdapter(this);
 
+        Toolbar toolbar = binding.topAppBar;
+        setSupportActionBar(toolbar);
+        toolbar.setOnMenuItemClickListener(this::onMenuItemClick);
+        toolbar.setNavigationIcon(R.drawable.ic_menu);
+        toolbar.setNavigationOnClickListener(this::showMenuFromIcon);
+
         binding.recycler.setLayoutManager(new LinearLayoutManager(this));
         binding.recycler.setAdapter(adapter);
-        binding.btnBack.setOnClickListener(v -> finish());
         binding.btnAddUser.setOnClickListener(v -> showCreateDialog());
 
         loadUsers();
+    }
+
+    private boolean onMenuItemClick(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_dashboard) {
+            startActivity(new android.content.Intent(this, HomeActivity.class));
+            return true;
+        }
+        if (id == R.id.action_chamados) {
+            startActivity(new android.content.Intent(this, ChamadosActivity.class));
+            return true;
+        }
+        if (id == R.id.action_users) return true;
+        if (id == R.id.action_profile) {
+            startActivity(new android.content.Intent(this, ProfileActivity.class));
+            return true;
+        }
+        if (id == R.id.action_logout) {
+            session.clear();
+            Ui.toast(this, "Sessão encerrada");
+            android.content.Intent i = new android.content.Intent(this, LoginActivity.class);
+            i.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+            return true;
+        }
+        return false;
+    }
+
+    private void showMenuFromIcon(View anchor) {
+        android.widget.PopupMenu menu = new android.widget.PopupMenu(this, anchor);
+        menu.inflate(R.menu.menu_home);
+        menu.setOnMenuItemClickListener(this::onMenuItemClick);
+        menu.show();
+    }
+
+    private boolean isAdmin() {
+        String role = session.getUserRole() == null ? "" : session.getUserRole().toLowerCase();
+        return role.contains("admin");
     }
 
     private void setLoading(boolean loading) {
@@ -78,23 +132,48 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
     }
 
     private void showCreateDialog() {
-        LayoutInflater inflater = LayoutInflater.from(this);
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         int pad = (int) (16 * getResources().getDisplayMetrics().density);
         layout.setPadding(pad, pad, pad, 0);
 
-        EditText nome = new EditText(this); nome.setHint("Nome");
-        EditText email = new EditText(this); email.setHint("Email");
-        EditText senha = new EditText(this); senha.setHint("Senha");
-        EditText cargo = new EditText(this); cargo.setHint("Cargo (admin/usuario/suporte)");
-        EditText nivel = new EditText(this); nivel.setHint("Nível (opcional)");
-
+        EditText nome = new EditText(this);
+        nome.setHint("Nome");
         layout.addView(nome);
+
+        EditText email = new EditText(this);
+        email.setHint("Email");
         layout.addView(email);
+
+        EditText senha = new EditText(this);
+        senha.setHint("Senha");
         layout.addView(senha);
+
+        EditText cpf = new EditText(this);
+        cpf.setHint("CPF");
+        layout.addView(cpf);
+
+        Spinner cargo = new Spinner(this);
+        ArrayAdapter<String> adapterCargo = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
+                new String[]{"usuario", "Suporte", "admin"});
+        cargo.setAdapter(adapterCargo);
         layout.addView(cargo);
+
+        EditText nivel = new EditText(this);
+        nivel.setHint("Nível (obrigatório para Suporte)");
+        nivel.setVisibility(View.GONE);
         layout.addView(nivel);
+
+        cargo.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                boolean isSuporte = "Suporte".equals(cargo.getSelectedItem());
+                nivel.setVisibility(isSuporte ? View.VISIBLE : View.GONE);
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) { }
+        });
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Novo usuário")
@@ -107,18 +186,29 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
             String n = nome.getText().toString().trim();
             String e = email.getText().toString().trim();
             String s = senha.getText().toString();
-            String c = cargo.getText().toString().trim();
+            String c = (String) cargo.getSelectedItem();
+            String cpfVal = cpf.getText().toString().trim();
+            boolean isSuporte = "Suporte".equalsIgnoreCase(c);
             if (n.isEmpty() || e.isEmpty() || s.isEmpty()) {
                 Ui.toast(this, "Nome, email e senha são obrigatórios");
                 return;
             }
             Integer nivelInt = null;
-            try {
+            if (isSuporte) {
                 String nv = nivel.getText().toString().trim();
-                if (!nv.isEmpty()) nivelInt = Integer.parseInt(nv);
-            } catch (NumberFormatException ignored) {}
+                if (nv.isEmpty()) {
+                    Ui.toast(this, "Informe o nível para suporte");
+                    return;
+                }
+                try {
+                    nivelInt = Integer.parseInt(nv);
+                } catch (NumberFormatException ex) {
+                    Ui.toast(this, "Nível deve ser numérico");
+                    return;
+                }
+            }
             dialog.dismiss();
-            createUser(new CreateUserRequest("", n, e, s, c.isEmpty() ? "usuario" : c, nivelInt));
+            createUser(new CreateUserRequest(cpfVal, n, e, s, c, nivelInt));
         }));
         dialog.show();
     }

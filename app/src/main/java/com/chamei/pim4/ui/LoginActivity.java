@@ -32,17 +32,16 @@ public class LoginActivity extends AppCompatActivity {
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+
         session = new SessionManager(this);
         authApi = ApiClient.get(this).create(AuthApi.class);
 
-        if (session.isAuthenticated()) {
-            openHome();
-            return;
-        }
-
-        binding.txtApiBase.setText(EnvConfig.getApiBaseUrl());
+        binding.txtApiBase.setText("API: " + EnvConfig.getApiBaseUrl());
         binding.btnLogin.setOnClickListener(v -> doLogin());
-        binding.linkRegister.setOnClickListener(v -> startActivity(new Intent(this, RegisterActivity.class)));
+        binding.btnRegister.setOnClickListener(v -> startActivity(new Intent(this, RegisterActivity.class)));
     }
 
     private void setLoading(boolean loading) {

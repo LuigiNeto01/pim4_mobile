@@ -8,7 +8,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.chamei.pim4.core.ApiClient;
-import com.chamei.pim4.core.SessionManager;
 import com.chamei.pim4.databinding.ActivityRegisterBinding;
 import com.chamei.pim4.model.LoginResponse;
 import com.chamei.pim4.model.RegisterRequest;
@@ -23,7 +22,6 @@ public class RegisterActivity extends AppCompatActivity {
 
     private ActivityRegisterBinding binding;
     private AuthApi authApi;
-    private SessionManager session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +29,10 @@ public class RegisterActivity extends AppCompatActivity {
         binding = ActivityRegisterBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        session = new SessionManager(this);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+
         authApi = ApiClient.get(this).create(AuthApi.class);
 
         binding.btnRegister.setOnClickListener(v -> doRegister());
@@ -49,8 +50,8 @@ public class RegisterActivity extends AppCompatActivity {
         String email = binding.inputEmail.getText() != null ? binding.inputEmail.getText().toString().trim() : "";
         String pass = binding.inputPassword.getText() != null ? binding.inputPassword.getText().toString() : "";
 
-        if (nome.isEmpty() || email.isEmpty() || pass.isEmpty()) {
-            Ui.toast(this, "Preencha nome, email e senha");
+        if (cpf.isEmpty() || nome.isEmpty() || email.isEmpty() || pass.isEmpty()) {
+            Ui.toast(this, "Todos os campos são obrigatórios");
             return;
         }
 
@@ -62,12 +63,8 @@ public class RegisterActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call<LoginResponse> call, @NonNull Response<LoginResponse> response) {
                 setLoading(false);
                 if (response.isSuccessful() && response.body() != null) {
-                    LoginResponse res = response.body();
-                    session.saveToken(res.token);
-                    if (res.user != null) {
-                        session.saveUser(res.user.nome, res.user.email, res.user.cargo, res.user.id);
-                    }
-                    Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+                    Ui.toast(RegisterActivity.this, "Conta criada! Faça login para continuar");
+                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 } else {
