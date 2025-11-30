@@ -321,6 +321,7 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
         Intent i = new Intent(this, ChatActivity.class);
         i.putExtra("chamadoId", chamado.id);
         i.putExtra("titulo", chamado.titulo);
+        i.putExtra("resolvido", chamado.resolvido);
         startActivity(i);
     }
 

@@ -2,12 +2,14 @@ package com.chamei.pim4.ui.adapters;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chamei.pim4.databinding.ItemChamadoBinding;
 import com.chamei.pim4.model.Chamado;
+import com.chamei.pim4.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +62,7 @@ public class ChamadoAdapter extends RecyclerView.Adapter<ChamadoAdapter.ViewHold
         void bind(Chamado c) {
             b.txtTitulo.setText(c.titulo != null ? c.titulo : "Chamado");
             b.txtMotivo.setText(c.motivo != null ? c.motivo : "-");
-            b.txtPrioridade.setText("Prioridade: " + c.prioridade);
+            setPrioridade(b.txtPrioridade, c.prioridade);
             b.txtStatus.setText(c.resolvido ? "Fechado" : "Aberto");
             b.btnStatus.setText(c.resolvido ? "Reabrir" : "Fechar");
             b.txtCriador.setText(c.nomeCriador != null ? c.nomeCriador : "");
@@ -71,6 +73,30 @@ public class ChamadoAdapter extends RecyclerView.Adapter<ChamadoAdapter.ViewHold
             b.btnStatus.setOnClickListener(v -> {
                 if (listener != null) listener.onToggleStatus(c);
             });
+        }
+
+        private void setPrioridade(TextView view, int prioridade) {
+            String label;
+            int color;
+            switch (prioridade) {
+                case 1:
+                    label = "Crítica (1)";
+                    color = view.getContext().getColor(R.color.priority_critica);
+                    break;
+                case 2:
+                    label = "Alta (2)";
+                    color = view.getContext().getColor(R.color.priority_alta);
+                    break;
+                case 3:
+                    label = "Média (3)";
+                    color = view.getContext().getColor(R.color.priority_media);
+                    break;
+                default:
+                    label = "Baixa (4)";
+                    color = view.getContext().getColor(R.color.priority_baixa);
+            }
+            view.setText(label);
+            view.setTextColor(color);
         }
     }
 }

@@ -125,7 +125,7 @@ public class ProfileActivity extends AppCompatActivity {
         if (!senha.isEmpty()) body.put("senha", senha);
 
         setLoading(true);
-        usersApi.update(session.getUserId(), body).enqueue(new Callback<Map<String, Object>>() {
+        usersApi.updateMe(body).enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(@NonNull Call<Map<String, Object>> call, @NonNull Response<Map<String, Object>> response) {
                 setLoading(false);

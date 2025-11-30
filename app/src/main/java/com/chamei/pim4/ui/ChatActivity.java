@@ -27,6 +27,7 @@ public class ChatActivity extends AppCompatActivity {
     private ChatApi chatApi;
     private ChatAdapter adapter;
     private int chamadoId;
+    private boolean chamadoFechado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,7 @@ public class ChatActivity extends AppCompatActivity {
 
         chamadoId = getIntent().getIntExtra("chamadoId", 0);
         String titulo = getIntent().getStringExtra("titulo");
+        chamadoFechado = getIntent().getBooleanExtra("resolvido", false);
         binding.txtTitulo.setText(titulo != null ? titulo : "Chat");
 
         chatApi = ApiClient.get(this).create(ChatApi.class);
@@ -45,6 +47,12 @@ public class ChatActivity extends AppCompatActivity {
 
         binding.btnSend.setOnClickListener(v -> sendMessage());
         binding.btnBack.setOnClickListener(v -> finish());
+
+        if (chamadoFechado) {
+            binding.btnSend.setEnabled(false);
+            binding.inputMessage.setEnabled(false);
+            binding.inputMessage.setHint("Chamado fechado. Mensagens desabilitadas.");
+        }
 
         loadMessages();
     }

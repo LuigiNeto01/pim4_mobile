@@ -24,6 +24,9 @@ public interface UsersApi {
     @PUT("/users/{id}")
     Call<Map<String, Object>> update(@Path("id") int id, @Body Map<String, Object> body);
 
+    @PUT("/users/me")
+    Call<Map<String, Object>> updateMe(@Body Map<String, Object> body);
+
     @DELETE("/users/{id}")
     Call<Map<String, Object>> delete(@Path("id") int id);
 }

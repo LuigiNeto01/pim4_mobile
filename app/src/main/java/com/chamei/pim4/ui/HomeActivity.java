@@ -30,6 +30,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -66,9 +68,13 @@ public class HomeActivity extends AppCompatActivity {
 
         boolean isAdmin = isAdmin();
         binding.btnGoUsers.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
-        binding.userCard.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+        // Distribuição por prioridade deve aparecer para todos, então mantemos visível
+        binding.userCard.setVisibility(View.VISIBLE);
+        binding.userStatsCard.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
         if (!isAdmin) {
-            binding.topAppBar.getMenu().findItem(R.id.action_users).setVisible(false);
+            if (binding.topAppBar.getMenu().findItem(R.id.action_users) != null) {
+                binding.topAppBar.getMenu().findItem(R.id.action_users).setVisible(false);
+            }
         }
 
         binding.btnGoChamados.setOnClickListener(v -> startActivity(new Intent(this, ChamadosActivity.class)));
@@ -80,6 +86,9 @@ public class HomeActivity extends AppCompatActivity {
     private void showMenuFromIcon(View anchor) {
         PopupMenu menu = new PopupMenu(this, anchor);
         menu.inflate(R.menu.menu_home);
+        if (!isAdmin()) {
+            menu.getMenu().findItem(R.id.action_users).setVisible(false);
+        }
         menu.setOnMenuItemClickListener(this::onMenuClick);
         menu.show();
     }
@@ -122,6 +131,11 @@ public class HomeActivity extends AppCompatActivity {
         return role.contains("admin");
     }
 
+    private boolean isUsuario() {
+        String role = session.getUserRole() == null ? "" : session.getUserRole().toLowerCase();
+        return role.contains("usuario");
+    }
+
     private void setLoading(boolean loading) {
         binding.dashboardProgress.setVisibility(loading ? View.VISIBLE : View.GONE);
         binding.scrollContent.setVisibility(loading ? View.INVISIBLE : View.VISIBLE);
@@ -132,7 +146,16 @@ public class HomeActivity extends AppCompatActivity {
         pendingCalls = admin ? 2 : 1;
         setLoading(true);
 
-        chamadosApi.listar().enqueue(new Callback<List<Chamado>>() {
+        Call<List<Chamado>> chamadosCall;
+        if (isUsuario()) {
+            Map<String, Integer> body = new HashMap<>();
+            body.put("userId", session.getUserId());
+            chamadosCall = chamadosApi.listarPorUsuario(body);
+        } else {
+            chamadosCall = chamadosApi.listar();
+        }
+
+        chamadosCall.enqueue(new Callback<List<Chamado>>() {
             @Override
             public void onResponse(@NonNull Call<List<Chamado>> call, @NonNull Response<List<Chamado>> response) {
                 if (response.isSuccessful() && response.body() != null) {

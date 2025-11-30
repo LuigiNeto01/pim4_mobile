@@ -18,4 +18,8 @@
     <color name="chamou_alert_bg">#FEE2E2</color>
     <color name="chamou_alert_text">#991B1B</color>
     <color name="chamou_bar_primary">#5B5FDF</color>
+    <color name="priority_critica">#DC2626</color>
+    <color name="priority_alta">#F97316</color>
+    <color name="priority_media">#2563EB</color>
+    <color name="priority_baixa">#0F172A</color>
 </resources>
