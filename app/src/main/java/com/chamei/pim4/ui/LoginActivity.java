@@ -39,7 +39,6 @@ public class LoginActivity extends AppCompatActivity {
         session = new SessionManager(this);
         authApi = ApiClient.get(this).create(AuthApi.class);
 
-        binding.txtApiBase.setText("API: " + EnvConfig.getApiBaseUrl());
         binding.btnLogin.setOnClickListener(v -> doLogin());
         binding.btnRegister.setOnClickListener(v -> startActivity(new Intent(this, RegisterActivity.class)));
     }

@@ -15,6 +15,7 @@ import java.util.List;
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     public interface Listener {
+        void onEdit(User user);
         void onDelete(User user);
     }
 
@@ -61,6 +62,9 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             b.txtEmail.setText(u.email != null ? u.email : "");
             b.txtCargo.setText(u.cargo != null ? u.cargo : "");
             b.txtNivel.setText(u.nivel != null ? "Nível " + u.nivel : "-");
+            b.btnEdit.setOnClickListener(v -> {
+                if (listener != null) listener.onEdit(u);
+            });
             b.btnDelete.setOnClickListener(v -> {
                 if (listener != null) listener.onDelete(u);
             });

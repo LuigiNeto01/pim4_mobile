@@ -3,6 +3,8 @@ package com.chamei.pim4.ui;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -101,6 +103,136 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
         menu.show();
     }
 
+    @Override
+    public void onEdit(User user) {
+        showEditDialog(user);
+    }
+
+    private void showEditDialog(User user) {
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        layout.setPadding(pad, pad, pad, 0);
+
+        EditText nome = new EditText(this);
+        nome.setHint("Nome");
+        nome.setText(user.nome);
+        layout.addView(nome);
+
+        EditText email = new EditText(this);
+        email.setHint("Email");
+        email.setText(user.email);
+        layout.addView(email);
+
+        EditText senha = new EditText(this);
+        senha.setHint("Nova senha (opcional)");
+        layout.addView(senha);
+
+        EditText cpf = new EditText(this);
+        cpf.setHint("CPF");
+        cpf.setText(user.cpf != null ? user.cpf : "");
+        applyCpfFilter(cpf);
+        layout.addView(cpf);
+
+        Spinner cargo = new Spinner(this);
+        ArrayAdapter<String> adapterCargo = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
+                new String[]{"usuario", "Suporte", "admin"});
+        cargo.setAdapter(adapterCargo);
+        int idx = 0;
+        if ("Suporte".equalsIgnoreCase(user.cargo)) idx = 1;
+        else if ("admin".equalsIgnoreCase(user.cargo)) idx = 2;
+        cargo.setSelection(idx);
+        layout.addView(cargo);
+
+        EditText nivel = new EditText(this);
+        nivel.setHint("Nível (obrigatório para Suporte)");
+        if (user.nivel != null) nivel.setText(String.valueOf(user.nivel));
+        nivel.setVisibility("Suporte".equalsIgnoreCase(user.cargo) ? View.VISIBLE : View.GONE);
+        layout.addView(nivel);
+
+        cargo.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                boolean isSuporte = "Suporte".equals(cargo.getSelectedItem());
+                nivel.setVisibility(isSuporte ? View.VISIBLE : View.GONE);
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) { }
+        });
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Editar usuário")
+                .setView(layout)
+                .setPositiveButton("Salvar", null)
+                .setNegativeButton("Cancelar", (d, w) -> d.dismiss())
+                .create();
+
+        dialog.setOnShowListener(dlg -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String n = nome.getText().toString().trim();
+            String e = email.getText().toString().trim();
+            String s = senha.getText().toString();
+            String c = (String) cargo.getSelectedItem();
+            String cpfVal = cpf.getText().toString().trim();
+            boolean isSuporte = "Suporte".equalsIgnoreCase(c);
+            if (n.isEmpty() || e.isEmpty()) {
+                Ui.toast(this, "Nome e email são obrigatórios");
+                return;
+            }
+            Integer nivelInt = null;
+            if (isSuporte) {
+                String nv = nivel.getText().toString().trim();
+                if (nv.isEmpty()) {
+                    Ui.toast(this, "Informe o nível para suporte");
+                    return;
+                }
+                try {
+                    nivelInt = Integer.parseInt(nv);
+                } catch (NumberFormatException ex) {
+                    Ui.toast(this, "Nível deve ser numérico");
+                    return;
+                }
+            }
+            Map<String, Object> body = new java.util.HashMap<>();
+            body.put("nome", n);
+            body.put("email", e);
+            body.put("cpf", cpfVal);
+            body.put("cargo", c);
+            body.put("nivel", isSuporte ? nivelInt : null);
+            if (!s.isEmpty()) body.put("senha", s);
+
+            dialog.dismiss();
+            updateUser(user.id, body);
+        }));
+        dialog.show();
+    }
+
+    private void applyCpfFilter(EditText editText) {
+        editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+        editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(11)});
+    }
+
+    private void updateUser(int id, Map<String, Object> body) {
+        setLoading(true);
+        usersApi.update(id, body).enqueue(new Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(@NonNull Call<Map<String, Object>> call, @NonNull Response<Map<String, Object>> response) {
+                setLoading(false);
+                if (response.isSuccessful()) {
+                    Ui.toast(UsersActivity.this, "Usuário atualizado");
+                    loadUsers();
+                } else {
+                    Ui.toast(UsersActivity.this, ApiClient.errorConverter().toMessage(response.errorBody(), "Erro ao atualizar usuário"));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Map<String, Object>> call, @NonNull Throwable t) {
+                setLoading(false);
+                Ui.toast(UsersActivity.this, "Falha: " + t.getMessage());
+            }
+        });
+    }
     private boolean isAdmin() {
         String role = session.getUserRole() == null ? "" : session.getUserRole().toLowerCase();
         return role.contains("admin");
@@ -151,6 +283,7 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
 
         EditText cpf = new EditText(this);
         cpf.setHint("CPF");
+        applyCpfFilter(cpf);
         layout.addView(cpf);
 
         Spinner cargo = new Spinner(this);

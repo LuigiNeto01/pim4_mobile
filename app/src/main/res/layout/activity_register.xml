@@ -9,7 +9,7 @@
         android:id="@+id/cardRegister"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:minHeight="520dp"
+        android:minHeight="540dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="48dp"
@@ -57,6 +57,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 app:boxCornerRadiusBottomEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
                 app:boxCornerRadiusTopEnd="12dp"
@@ -77,15 +79,19 @@
                 android:layout_marginTop="12dp"
                 app:boxCornerRadiusBottomEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 app:boxCornerRadiusTopEnd="12dp"
                 app:boxCornerRadiusTopStart="12dp">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/inputCpf"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="CPF"
-                    android:inputType="number" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputCpf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="CPF"
+                android:inputType="number"
+                android:maxLength="11"
+                android:digits="0123456789" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -94,6 +100,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 app:boxCornerRadiusBottomEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
                 app:boxCornerRadiusTopEnd="12dp"
@@ -115,6 +123,8 @@
                 android:layout_marginTop="12dp"
                 app:boxCornerRadiusBottomEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 app:boxCornerRadiusTopEnd="12dp"
                 app:boxCornerRadiusTopStart="12dp"
                 app:endIconMode="password_toggle">
@@ -132,11 +142,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:background="@drawable/bg_primary_button"
                 android:drawableEnd="@drawable/ic_arrow_right"
                 android:drawablePadding="8dp"
-                android:paddingTop="14dp"
-                android:paddingBottom="14dp"
                 android:text="Registrar"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
