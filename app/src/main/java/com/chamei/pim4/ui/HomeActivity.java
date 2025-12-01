@@ -37,12 +37,20 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Dashboard principal: exibe resumo de chamados, alertas, ultimos itens e
+ * estatisticas de usuarios (para admin).
+ */
 public class HomeActivity extends AppCompatActivity {
 
+    // Binding do layout do dashboard
     private ActivityHomeBinding binding;
+    // Controle de sessao/autenticacao
     private SessionManager session;
+    // Clientes de API usados na tela
     private ChamadosApi chamadosApi;
     private UsersApi usersApi;
+    // Contador para sincronizar finalizacao das chamadas paralelas
     private int pendingCalls = 0;
 
     @Override
@@ -53,23 +61,26 @@ public class HomeActivity extends AppCompatActivity {
 
         session = new SessionManager(this);
         if (!session.isAuthenticated()) {
+            // Sem token: manda para login
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
         }
 
+        // Configura toolbar e menu
         setSupportActionBar(binding.topAppBar);
         binding.topAppBar.setNavigationIcon(R.drawable.ic_menu);
         binding.topAppBar.setNavigationOnClickListener(this::showMenuFromIcon);
         binding.topAppBar.setOnMenuItemClickListener(this::onMenuClick);
 
+        // Instancia clientes de API
         chamadosApi = ApiClient.get(this).create(ChamadosApi.class);
         usersApi = ApiClient.get(this).create(UsersApi.class);
 
         boolean isAdmin = isAdmin();
+        // Mostra/oculta botoes e cards conforme permissao
         binding.btnGoUsers.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
-        // Distribuição por prioridade deve aparecer para todos, então mantemos visível
-        binding.userCard.setVisibility(View.VISIBLE);
+        binding.userCard.setVisibility(View.VISIBLE); // Distribuicao por prioridade deve aparecer para todos
         binding.userStatsCard.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
         if (!isAdmin) {
             if (binding.topAppBar.getMenu().findItem(R.id.action_users) != null) {
@@ -96,7 +107,7 @@ public class HomeActivity extends AppCompatActivity {
     private boolean onMenuClick(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_dashboard) {
-            Ui.toast(this, "Você está no dashboard");
+            Ui.toast(this, "Voce esta no dashboard");
             return true;
         }
         if (id == R.id.action_chamados) {
@@ -107,7 +118,7 @@ public class HomeActivity extends AppCompatActivity {
             if (isAdmin()) {
                 startActivity(new Intent(this, UsersActivity.class));
             } else {
-                Ui.toast(this, "Apenas admin pode gerir usuários");
+                Ui.toast(this, "Apenas admin pode gerir usuarios");
             }
             return true;
         }
@@ -116,8 +127,9 @@ public class HomeActivity extends AppCompatActivity {
             return true;
         }
         if (id == R.id.action_logout) {
+            // Limpa sessao e fecha a pilha
             session.clear();
-            Ui.toast(this, "Sessão encerrada");
+            Ui.toast(this, "Sessao encerrada");
             Intent i = new Intent(this, LoginActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
@@ -137,15 +149,18 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void setLoading(boolean loading) {
+        // Alterna entre spinner central e conteudo
         binding.dashboardProgress.setVisibility(loading ? View.VISIBLE : View.GONE);
         binding.scrollContent.setVisibility(loading ? View.INVISIBLE : View.VISIBLE);
     }
 
     private void loadDashboard() {
+        // Dispara chamadas necessarias; admin precisa de duas (chamados e usuarios)
         boolean admin = isAdmin();
         pendingCalls = admin ? 2 : 1;
         setLoading(true);
 
+        // Escolhe endpoint de chamados conforme role
         Call<List<Chamado>> chamadosCall;
         if (isUsuario()) {
             Map<String, Integer> body = new HashMap<>();
@@ -155,13 +170,14 @@ public class HomeActivity extends AppCompatActivity {
             chamadosCall = chamadosApi.listar();
         }
 
+        // Chamada de chamados
         chamadosCall.enqueue(new Callback<List<Chamado>>() {
             @Override
             public void onResponse(@NonNull Call<List<Chamado>> call, @NonNull Response<List<Chamado>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     renderChamados(response.body());
                 } else {
-                    Ui.toast(HomeActivity.this, "Não foi possível carregar chamados");
+                    Ui.toast(HomeActivity.this, "Nao foi possivel carregar chamados");
                 }
                 finishCall();
             }
@@ -173,6 +189,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+        // Admin tambem carrega estatisticas de usuarios
         if (admin) {
             usersApi.list().enqueue(new Callback<List<User>>() {
                 @Override
@@ -180,14 +197,14 @@ public class HomeActivity extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null) {
                         renderUsers(response.body());
                     } else {
-                        Ui.toast(HomeActivity.this, "Não foi possível carregar usuários");
+                        Ui.toast(HomeActivity.this, "Nao foi possivel carregar usuarios");
                     }
                     finishCall();
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<List<User>> call, @NonNull Throwable t) {
-                    Ui.toast(HomeActivity.this, "Erro ao carregar usuários: " + t.getMessage());
+                    Ui.toast(HomeActivity.this, "Erro ao carregar usuarios: " + t.getMessage());
                     finishCall();
                 }
             });
@@ -195,6 +212,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void finishCall() {
+        // Controla quando ambas as chamadas terminam para esconder loader
         pendingCalls -= 1;
         if (pendingCalls <= 0) {
             setLoading(false);
@@ -212,6 +230,7 @@ public class HomeActivity extends AppCompatActivity {
             int baixa = 0;
             List<Chamado> openChamados = new ArrayList<>();
 
+            // Conta status e prioridade de cada chamado
             for (Chamado c : chamados) {
                 boolean aberto = !c.resolvido;
                 if (aberto) {
@@ -233,6 +252,7 @@ public class HomeActivity extends AppCompatActivity {
                 }
             }
 
+            // Atualiza cards de contadores
             binding.txtOpenCount.setText(String.valueOf(open));
             binding.txtClosedCount.setText(String.valueOf(closed));
             binding.txtCriticalCount.setText(String.valueOf(criticalOpen));
@@ -252,12 +272,14 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void updateProgress(ProgressBar bar, int total, int value) {
+        // Evita divisao por zero ajustando o maximo
         int max = Math.max(total, 1);
         bar.setMax(max);
         bar.setProgress(value);
     }
 
     private long countOlderThan(List<Chamado> chamados, int days) {
+        // Conta chamados abertos com mais de X dias
         long now = System.currentTimeMillis();
         long threshold = now - (long) days * 24 * 60 * 60 * 1000;
         long count = 0;
@@ -269,9 +291,10 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void updateAlerts(int criticalOpen, long oldOpen) {
+        // Mostra alertas conforme situacao dos chamados
         if (criticalOpen > 0) {
             binding.alertCritical.setVisibility(View.VISIBLE);
-            binding.txtCriticalLabel.setText("Há " + criticalOpen + " chamado(s) crítico(s) aberto(s).");
+            binding.txtCriticalLabel.setText("Ha " + criticalOpen + " chamado(s) critico(s) aberto(s).");
         } else {
             binding.alertCritical.setVisibility(View.GONE);
         }
@@ -285,6 +308,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void renderRecent(List<Chamado> chamados) {
+        // Monta lista de ultimos chamados abertos
         binding.recentContainer.removeAllViews();
         if (chamados.isEmpty()) {
             addRecentText("Sem chamados recentes");
@@ -320,6 +344,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void addRecentItem(String title, String subtitle, String date) {
+        // Cria bloco vertical com titulo, descricao e data
         LinearLayout item = new LinearLayout(this);
         item.setOrientation(LinearLayout.VERTICAL);
         item.setPadding(0, 0, 0, 12);
@@ -363,7 +388,7 @@ public class HomeActivity extends AppCompatActivity {
             binding.txtUsersAdmin.setText(String.valueOf(admins));
             binding.txtUsersSuporte.setText(String.valueOf(suporte));
         } catch (Exception e) {
-            Ui.toast(this, "Erro ao processar dados de usuários");
+            Ui.toast(this, "Erro ao processar dados de usuarios");
         }
     }
 

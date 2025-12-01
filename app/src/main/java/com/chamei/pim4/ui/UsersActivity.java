@@ -33,11 +33,19 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Tela de administracao de usuarios (visivel apenas para admins).
+ * Permite listar, criar, editar e remover usuarios.
+ */
 public class UsersActivity extends AppCompatActivity implements UserAdapter.Listener {
 
+    // Binding para acessar as views da tela
     private ActivityUsersBinding binding;
+    // Cliente Retrofit para endpoints de usuarios
     private UsersApi usersApi;
+    // Adapter da lista de usuarios
     private UserAdapter adapter;
+    // Gerencia dados da sessao e role atual
     private SessionManager session;
 
     @Override
@@ -49,7 +57,8 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
         session = new SessionManager(this);
         String role = session.getUserRole() == null ? "" : session.getUserRole().toLowerCase();
         if (!role.contains("admin")) {
-            Ui.toast(this, "Apenas admin pode gerir usuários");
+            // Bloqueia acesso para quem nao e admin
+            Ui.toast(this, "Apenas admin pode gerir usuarios");
             finish();
             return;
         }
@@ -57,12 +66,14 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
         usersApi = ApiClient.get(this).create(UsersApi.class);
         adapter = new UserAdapter(this);
 
+        // Configura toolbar com menu superior
         Toolbar toolbar = binding.topAppBar;
         setSupportActionBar(toolbar);
         toolbar.setOnMenuItemClickListener(this::onMenuItemClick);
         toolbar.setNavigationIcon(R.drawable.ic_menu);
         toolbar.setNavigationOnClickListener(this::showMenuFromIcon);
 
+        // Configura RecyclerView
         binding.recycler.setLayoutManager(new LinearLayoutManager(this));
         binding.recycler.setAdapter(adapter);
         binding.btnAddUser.setOnClickListener(v -> showCreateDialog());
@@ -71,6 +82,7 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
     }
 
     private boolean onMenuItemClick(@NonNull MenuItem item) {
+        // Navegacao principal pelo menu superior/popup
         int id = item.getItemId();
         if (id == R.id.action_dashboard) {
             startActivity(new android.content.Intent(this, HomeActivity.class));
@@ -86,8 +98,9 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
             return true;
         }
         if (id == R.id.action_logout) {
+            // Limpa sessao e volta para login
             session.clear();
-            Ui.toast(this, "Sessão encerrada");
+            Ui.toast(this, "Sessao encerrada");
             android.content.Intent i = new android.content.Intent(this, LoginActivity.class);
             i.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
@@ -109,6 +122,7 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
     }
 
     private void showEditDialog(User user) {
+        // Layout vertical simples para colocar campos dinamicamente
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         int pad = (int) (16 * getResources().getDisplayMetrics().density);
@@ -145,11 +159,12 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
         layout.addView(cargo);
 
         EditText nivel = new EditText(this);
-        nivel.setHint("Nível (obrigatório para Suporte)");
+        nivel.setHint("Nivel (obrigatorio para Suporte)");
         if (user.nivel != null) nivel.setText(String.valueOf(user.nivel));
         nivel.setVisibility("Suporte".equalsIgnoreCase(user.cargo) ? View.VISIBLE : View.GONE);
         layout.addView(nivel);
 
+        // Mostra/oculta campo de nivel quando cargo muda
         cargo.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
@@ -162,7 +177,7 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
         });
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("Editar usuário")
+                .setTitle("Editar usuario")
                 .setView(layout)
                 .setPositiveButton("Salvar", null)
                 .setNegativeButton("Cancelar", (d, w) -> d.dismiss())
@@ -176,23 +191,24 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
             String cpfVal = cpf.getText().toString().trim();
             boolean isSuporte = "Suporte".equalsIgnoreCase(c);
             if (n.isEmpty() || e.isEmpty()) {
-                Ui.toast(this, "Nome e email são obrigatórios");
+                Ui.toast(this, "Nome e email sao obrigatorios");
                 return;
             }
             Integer nivelInt = null;
             if (isSuporte) {
                 String nv = nivel.getText().toString().trim();
                 if (nv.isEmpty()) {
-                    Ui.toast(this, "Informe o nível para suporte");
+                    Ui.toast(this, "Informe o nivel para suporte");
                     return;
                 }
                 try {
                     nivelInt = Integer.parseInt(nv);
                 } catch (NumberFormatException ex) {
-                    Ui.toast(this, "Nível deve ser numérico");
+                    Ui.toast(this, "Nivel deve ser numerico");
                     return;
                 }
             }
+            // Monta payload e envia para API
             Map<String, Object> body = new java.util.HashMap<>();
             body.put("nome", n);
             body.put("email", e);
@@ -208,6 +224,7 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
     }
 
     private void applyCpfFilter(EditText editText) {
+        // Garante que so numeros e no maximo 11 digitos sejam digitados
         editText.setInputType(InputType.TYPE_CLASS_NUMBER);
         editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(11)});
     }
@@ -219,10 +236,10 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
             public void onResponse(@NonNull Call<Map<String, Object>> call, @NonNull Response<Map<String, Object>> response) {
                 setLoading(false);
                 if (response.isSuccessful()) {
-                    Ui.toast(UsersActivity.this, "Usuário atualizado");
+                    Ui.toast(UsersActivity.this, "Usuario atualizado");
                     loadUsers();
                 } else {
-                    Ui.toast(UsersActivity.this, ApiClient.errorConverter().toMessage(response.errorBody(), "Erro ao atualizar usuário"));
+                    Ui.toast(UsersActivity.this, ApiClient.errorConverter().toMessage(response.errorBody(), "Erro ao atualizar usuario"));
                 }
             }
 
@@ -233,16 +250,19 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
             }
         });
     }
+
     private boolean isAdmin() {
         String role = session.getUserRole() == null ? "" : session.getUserRole().toLowerCase();
         return role.contains("admin");
     }
 
     private void setLoading(boolean loading) {
+        // Exibe progresso central e bloqueia interacoes pesadas
         binding.progress.setVisibility(loading ? View.VISIBLE : View.GONE);
     }
 
     private void loadUsers() {
+        // Busca a lista completa na API e atualiza a RecyclerView
         setLoading(true);
         usersApi.list().enqueue(new Callback<List<User>>() {
             @Override
@@ -264,6 +284,7 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
     }
 
     private void showCreateDialog() {
+        // Layout para capturar dados do novo usuario
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         int pad = (int) (16 * getResources().getDisplayMetrics().density);
@@ -293,10 +314,11 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
         layout.addView(cargo);
 
         EditText nivel = new EditText(this);
-        nivel.setHint("Nível (obrigatório para Suporte)");
+        nivel.setHint("Nivel (obrigatorio para Suporte)");
         nivel.setVisibility(View.GONE);
         layout.addView(nivel);
 
+        // Controla exibicao do nivel conforme cargo
         cargo.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
@@ -309,7 +331,7 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
         });
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("Novo usuário")
+                .setTitle("Novo usuario")
                 .setView(layout)
                 .setPositiveButton("Criar", null)
                 .setNegativeButton("Cancelar", (d, w) -> d.dismiss())
@@ -323,20 +345,20 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
             String cpfVal = cpf.getText().toString().trim();
             boolean isSuporte = "Suporte".equalsIgnoreCase(c);
             if (n.isEmpty() || e.isEmpty() || s.isEmpty()) {
-                Ui.toast(this, "Nome, email e senha são obrigatórios");
+                Ui.toast(this, "Nome, email e senha sao obrigatorios");
                 return;
             }
             Integer nivelInt = null;
             if (isSuporte) {
                 String nv = nivel.getText().toString().trim();
                 if (nv.isEmpty()) {
-                    Ui.toast(this, "Informe o nível para suporte");
+                    Ui.toast(this, "Informe o nivel para suporte");
                     return;
                 }
                 try {
                     nivelInt = Integer.parseInt(nv);
                 } catch (NumberFormatException ex) {
-                    Ui.toast(this, "Nível deve ser numérico");
+                    Ui.toast(this, "Nivel deve ser numerico");
                     return;
                 }
             }
@@ -353,10 +375,10 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
             public void onResponse(@NonNull Call<Map<String, Object>> call, @NonNull Response<Map<String, Object>> response) {
                 setLoading(false);
                 if (response.isSuccessful()) {
-                    Ui.toast(UsersActivity.this, "Usuário criado");
+                    Ui.toast(UsersActivity.this, "Usuario criado");
                     loadUsers();
                 } else {
-                    Ui.toast(UsersActivity.this, ApiClient.errorConverter().toMessage(response.errorBody(), "Erro ao criar usuário"));
+                    Ui.toast(UsersActivity.this, ApiClient.errorConverter().toMessage(response.errorBody(), "Erro ao criar usuario"));
                 }
             }
 
@@ -371,7 +393,7 @@ public class UsersActivity extends AppCompatActivity implements UserAdapter.List
     @Override
     public void onDelete(User user) {
         new AlertDialog.Builder(this)
-                .setTitle("Remover usuário")
+                .setTitle("Remover usuario")
                 .setMessage("Remover " + user.nome + "?")
                 .setPositiveButton("Remover", (d, w) -> doDelete(user.id))
                 .setNegativeButton("Cancelar", null)

@@ -12,6 +12,9 @@ import com.chamei.pim4.model.User;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Adapter para a lista de usuarios na tela de administracao.
+ */
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     public interface Listener {
@@ -19,6 +22,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         void onDelete(User user);
     }
 
+    // Lista atual exibida
     private final List<User> items = new ArrayList<>();
     private final Listener listener;
 
@@ -27,6 +31,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     }
 
     public void setItems(List<User> novos) {
+        // Substitui lista atual pela recebida da API
         items.clear();
         if (novos != null) items.addAll(novos);
         notifyDataSetChanged();
@@ -58,10 +63,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         }
 
         void bind(User u) {
+            // Preenche textos basicos
             b.txtNome.setText(u.nome != null ? u.nome : "");
             b.txtEmail.setText(u.email != null ? u.email : "");
             b.txtCargo.setText(u.cargo != null ? u.cargo : "");
-            b.txtNivel.setText(u.nivel != null ? "Nível " + u.nivel : "-");
+            b.txtNivel.setText(u.nivel != null ? "Nivel " + u.nivel : "-");
+
+            // Aciona listeners do adapter
             b.btnEdit.setOnClickListener(v -> {
                 if (listener != null) listener.onEdit(u);
             });

@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- Cabecalho simples com botao de voltar e titulo do chamado -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="0dp"
@@ -31,6 +32,7 @@
             android:paddingStart="12dp" />
     </LinearLayout>
 
+    <!-- Lista de mensagens -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="0dp"
@@ -42,6 +44,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/inputContainer" />
 
+    <!-- Barra de entrada e envio de mensagem -->
     <LinearLayout
         android:id="@+id/inputContainer"
         android:orientation="horizontal"
@@ -66,6 +69,7 @@
             android:text="Enviar" />
     </LinearLayout>
 
+    <!-- Loader central para chamadas de rede -->
     <ProgressBar
         android:id="@+id/progress"
         android:layout_width="48dp"

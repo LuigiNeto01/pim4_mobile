@@ -9,24 +9,30 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * Anexa o bearer token salvo pelo SessionManager em cada requisição autenticada.
+ * Interceptor responsavel por incluir o header Authorization em cada requisicao
+ * quando existir um token salvo no SessionManager.
  */
-public class    AuthInterceptor implements Interceptor {
+public class AuthInterceptor implements Interceptor {
     private final SessionManager sessionManager;
 
     public AuthInterceptor(SessionManager sessionManager) {
         this.sessionManager = sessionManager;
     }
 
+    /**
+     * Insere o bearer token no cabecalho antes de prosseguir com a cadeia.
+     */
     @NonNull
     @Override
     public Response intercept(@NonNull Chain chain) throws IOException {
         Request original = chain.request();
         String token = sessionManager.getToken();
         if (token == null || token.isEmpty()) {
+            // Sem token: deixa a chamada seguir sem autenticacao
             return chain.proceed(original);
         }
 
+        // Reconstrui a requisicao adicionando o bearer token
         Request authed = original.newBuilder()
                 .addHeader("Authorization", "Bearer " + token)
                 .build();

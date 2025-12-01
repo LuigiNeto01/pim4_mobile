@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permite chamadas HTTP para a API -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -15,6 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Pim4">
 
+        <!-- Fluxo principal do app (apenas atividades internas exportadas=false) -->
         <activity
             android:name=".ui.UsersActivity"
             android:exported="false" />
@@ -33,6 +35,7 @@
         <activity
             android:name=".ui.ProfileActivity"
             android:exported="false" />
+        <!-- Tela de login e launcher da aplicacao -->
         <activity
             android:name=".ui.LoginActivity"
             android:exported="true">

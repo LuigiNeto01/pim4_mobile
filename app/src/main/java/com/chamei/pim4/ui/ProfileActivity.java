@@ -24,10 +24,16 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Tela de edicao de perfil do usuario logado (nome, email e senha).
+ */
 public class ProfileActivity extends AppCompatActivity {
 
+    // Binding do layout de perfil
     private ActivityProfileBinding binding;
+    // Sessao do usuario logado
     private SessionManager session;
+    // Cliente para alterar dados do usuario
     private UsersApi usersApi;
 
     @Override
@@ -38,6 +44,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         session = new SessionManager(this);
         if (!session.isAuthenticated()) {
+            // Se nao ha token, volta direto para login
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
@@ -48,6 +55,7 @@ public class ProfileActivity extends AppCompatActivity {
         Toolbar toolbar = binding.topAppBar;
         setSupportActionBar(toolbar);
         if (isAdmin()) {
+            // Admin mantem menu lateral
             toolbar.setNavigationIcon(R.drawable.ic_menu);
             toolbar.setNavigationOnClickListener(this::showMenu);
         } else {
@@ -55,14 +63,17 @@ public class ProfileActivity extends AppCompatActivity {
         }
         toolbar.setOnMenuItemClickListener(this::onMenuItemClick);
 
+        // Preenche campos com dados atuais do usuario
         binding.inputNome.setText(session.getUserName());
         binding.inputEmail.setText(session.getUserEmail());
         binding.txtCargo.setText("Cargo: " + session.getUserRole());
 
+        // Botao que salva alteracoes
         binding.btnSalvar.setOnClickListener(v -> saveProfile());
     }
 
     private boolean onMenuItemClick(@NonNull MenuItem item) {
+        // Navegacao principal compartilhada nas telas; cada item abre outra Activity
         int id = item.getItemId();
         if (id == R.id.action_dashboard) {
             startActivity(new Intent(this, HomeActivity.class));
@@ -76,14 +87,16 @@ public class ProfileActivity extends AppCompatActivity {
             if (isAdmin()) {
                 startActivity(new Intent(this, UsersActivity.class));
             } else {
-                Ui.toast(this, "Apenas admin pode gerir usuários");
+                // Bloqueia acesso a usuarios para nao-admin
+                Ui.toast(this, "Apenas admin pode gerir usuarios");
             }
             return true;
         }
         if (id == R.id.action_profile) return true;
         if (id == R.id.action_logout) {
+            // Limpa sessao e redireciona para login
             session.clear();
-            Ui.toast(this, "Sessão encerrada");
+            Ui.toast(this, "Sessao encerrada");
             Intent i = new Intent(this, LoginActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
@@ -93,6 +106,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void showMenu(View anchor) {
+        // Abre menu popup a partir do icone de navegacao
         PopupMenu menu = new PopupMenu(this, anchor);
         menu.inflate(R.menu.menu_home);
         menu.setOnMenuItemClickListener(this::onMenuItemClick);
@@ -105,20 +119,23 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setLoading(boolean loading) {
+        // Habilita/desabilita botao e mostra progresso
         binding.progress.setVisibility(loading ? View.VISIBLE : View.GONE);
         binding.btnSalvar.setEnabled(!loading);
     }
 
     private void saveProfile() {
+        // Coleta dados digitados pelo usuario
         String nome = binding.inputNome.getText() != null ? binding.inputNome.getText().toString().trim() : "";
         String email = binding.inputEmail.getText() != null ? binding.inputEmail.getText().toString().trim() : "";
         String senha = binding.inputSenha.getText() != null ? binding.inputSenha.getText().toString() : "";
 
         if (nome.isEmpty() || email.isEmpty()) {
-            Ui.toast(this, "Nome e email são obrigatórios");
+            Ui.toast(this, "Nome e email sao obrigatorios");
             return;
         }
 
+        // Monta mapa dinamico pois a senha e opcional
         Map<String, Object> body = new HashMap<>();
         body.put("nome", nome);
         body.put("email", email);
@@ -130,6 +147,7 @@ public class ProfileActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call<Map<String, Object>> call, @NonNull Response<Map<String, Object>> response) {
                 setLoading(false);
                 if (response.isSuccessful()) {
+                    // Atualiza cache local para refletir novos dados
                     session.saveUser(nome, email, session.getUserRole(), session.getUserId());
                     Ui.toast(ProfileActivity.this, "Perfil atualizado");
                     finish();

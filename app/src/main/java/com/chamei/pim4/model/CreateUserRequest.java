@@ -1,6 +1,10 @@
 package com.chamei.pim4.model;
 
+/**
+ * Corpo usado pelo admin para criar novos usuarios.
+ */
 public class CreateUserRequest {
+    // Dados enviados pelo admin para criar usuarios
     public String cpf;
     public String nome;
     public String email;

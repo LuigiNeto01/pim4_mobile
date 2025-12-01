@@ -1,6 +1,10 @@
 package com.chamei.pim4.model;
 
+/**
+ * Corpo enviado ao endpoint de registro de usuario.
+ */
 public class RegisterRequest {
+    // Dados obrigatorios para criar uma nova conta
     public String cpf;
     public String nome;
     public String email;

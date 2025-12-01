@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!-- Opcoes do menu superior compartilhado -->
     <item
         android:id="@+id/action_dashboard"
         android:title="Dashboard" />
@@ -12,7 +13,7 @@
         android:title="Chamados" />
     <item
         android:id="@+id/action_users"
-        android:title="Gerir Usuários" />
+        android:title="Gerir Usuarios" />
     <item
         android:id="@+id/action_logout"
         android:title="Sair" />

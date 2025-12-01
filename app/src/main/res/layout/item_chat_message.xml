@@ -7,6 +7,7 @@
     android:layout_marginBottom="6dp"
     android:background="@drawable/bg_card">
 
+    <!-- Nome do autor da mensagem -->
     <TextView
         android:id="@+id/txtNome"
         android:layout_width="match_parent"
@@ -14,6 +15,7 @@
         android:textStyle="bold"
         android:textSize="14sp" />
 
+    <!-- Conteudo da mensagem -->
     <TextView
         android:id="@+id/txtMensagem"
         android:layout_width="match_parent"
@@ -21,6 +23,7 @@
         android:layout_marginTop="4dp"
         android:textSize="14sp" />
 
+    <!-- Data/hora do envio -->
     <TextView
         android:id="@+id/txtData"
         android:layout_width="match_parent"

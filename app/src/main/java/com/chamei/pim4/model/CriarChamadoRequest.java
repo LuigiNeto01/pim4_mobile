@@ -1,6 +1,10 @@
 package com.chamei.pim4.model;
 
+/**
+ * Payload usado para criar um chamado.
+ */
 public class CriarChamadoRequest {
+    // Dados enviados para abrir um novo chamado
     public String titulo;
     public String motivo;
     public String descricao;

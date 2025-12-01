@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/chamou_background">
 
+    <!-- Barra superior com menu -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="0dp"
@@ -20,6 +21,7 @@
         app:title="Chamou!"
         app:titleTextColor="@color/chamou_title" />
 
+    <!-- Conteudo com swipe-to-refresh englobando filtros e lista -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_width="0dp"
@@ -34,6 +36,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <!-- Barra de filtros (status e prioridade) -->
             <LinearLayout
                 android:id="@+id/filterBar"
                 android:layout_width="match_parent"
@@ -57,6 +60,7 @@
                     android:layout_marginStart="12dp" />
             </LinearLayout>
 
+            <!-- Lista de chamados -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler"
                 android:layout_width="match_parent"
@@ -67,6 +71,7 @@
         </LinearLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+    <!-- Loader central -->
     <ProgressBar
         android:id="@+id/progress"
         android:layout_width="48dp"
@@ -77,6 +82,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Botao flutuante para criar novo chamado -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAdd"
         android:layout_width="wrap_content"

@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/chamou_background">
 
+    <!-- Barra superior com menu -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="0dp"
@@ -20,6 +21,7 @@
         app:title="Chamou!"
         app:titleTextColor="@color/chamou_title" />
 
+    <!-- Lista de usuarios -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="0dp"
@@ -31,6 +33,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <!-- Loader central -->
     <ProgressBar
         android:id="@+id/progress"
         android:layout_width="48dp"
@@ -41,6 +44,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Botao flutuante para criar usuario -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAddUser"
         android:layout_width="wrap_content"

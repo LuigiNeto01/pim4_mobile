@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/chamou_background">
 
+    <!-- Cartao principal da tela de cadastro -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardRegister"
         android:layout_width="0dp"
@@ -51,6 +52,7 @@
                 android:textColor="@color/chamou_subtitle"
                 android:textSize="14sp" />
 
+            <!-- Campo nome -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layoutNome"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -71,6 +73,7 @@
                     android:hint="Nome completo" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Campo CPF -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layoutCpf"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -84,16 +87,17 @@
                 app:boxCornerRadiusTopEnd="12dp"
                 app:boxCornerRadiusTopStart="12dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/inputCpf"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="CPF"
-                android:inputType="number"
-                android:maxLength="11"
-                android:digits="0123456789" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputCpf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="CPF"
+                    android:inputType="number"
+                    android:maxLength="11"
+                    android:digits="0123456789" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Campo email -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layoutEmail"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -115,6 +119,7 @@
                     android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Campo senha -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layoutPassword"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -137,6 +142,7 @@
                     android:inputType="textPassword" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Botao principal de registro -->
             <Button
                 android:id="@+id/btnRegister"
                 android:layout_width="match_parent"
@@ -154,6 +160,7 @@
                 android:textColor="@android:color/white"
                 android:textStyle="bold" />
 
+            <!-- Loader durante a chamada de cadastro -->
             <ProgressBar
                 android:id="@+id/progress"
                 android:layout_width="wrap_content"

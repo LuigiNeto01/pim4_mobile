@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/chamou_background">
 
+    <!-- Barra superior compartilhada com menu -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="0dp"
@@ -19,6 +20,7 @@
         app:title="Chamou!"
         app:titleTextColor="@color/chamou_title" />
 
+    <!-- Card com formulario de edicao de perfil -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -97,6 +99,7 @@
             android:textStyle="bold"
             android:textAllCaps="false" />
 
+        <!-- Loader durante a chamada de update -->
         <ProgressBar
             android:id="@+id/progress"
             android:layout_width="wrap_content"

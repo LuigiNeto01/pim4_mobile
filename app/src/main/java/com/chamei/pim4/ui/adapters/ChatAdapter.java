@@ -15,18 +15,25 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Adapter simples para a lista de mensagens do chat de um chamado.
+ */
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
+    // Mensagens atualmente exibidas
     private final List<ChatMessageItem> items = new ArrayList<>();
+    // Formato de data compacto
     private final SimpleDateFormat fmt = new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault());
 
     public void setItems(List<ChatMessageItem> novos) {
+        // Substitui toda a lista (usado ao recarregar historico)
         items.clear();
         if (novos != null) items.addAll(novos);
         notifyDataSetChanged();
     }
 
     public void add(ChatMessageItem item) {
+        // Insere mensagem ao final e notifica RecyclerView
         items.add(item);
         notifyItemInserted(items.size() - 1);
     }
@@ -57,8 +64,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         }
 
         void bind(ChatMessageItem item) {
-            b.txtNome.setText(item.nome != null ? item.nome : "Usuário");
+            // Nome de quem enviou
+            b.txtNome.setText(item.nome != null ? item.nome : "Usuario");
+            // Conteudo da mensagem
             b.txtMensagem.setText(item.mensagem != null ? item.mensagem : "");
+            // Data formatada (usa data atual se vier nulo)
             Date dt = item.dataEnvio != null ? item.dataEnvio : new Date();
             b.txtData.setText(fmt.format(dt));
         }

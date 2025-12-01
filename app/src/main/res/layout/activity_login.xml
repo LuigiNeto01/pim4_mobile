@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/chamou_background">
 
+    <!-- Cartao central da tela de login -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardLogin"
         android:layout_width="0dp"
@@ -54,6 +55,7 @@
                 android:textColor="@color/chamou_subtitle"
                 android:textSize="14sp" />
 
+            <!-- Campo de email -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layoutEmail"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -75,6 +77,7 @@
                     android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Campo de senha com toggle -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layoutPassword"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -108,6 +111,7 @@
                 android:textColor="@color/chamou_subtitle"
                 android:textSize="0sp" />
 
+            <!-- Botoes de acao -->
             <Button
                 android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
@@ -143,6 +147,7 @@
                 android:textColor="@android:color/white"
                 android:textStyle="bold" />
 
+            <!-- Loading exibido enquanto a chamada de login acontece -->
             <ProgressBar
                 android:id="@+id/progress"
                 android:layout_width="wrap_content"

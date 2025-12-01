@@ -21,12 +21,21 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Tela de chat vinculada a um chamado especifico.
+ * Carrega historico e permite enviar novas mensagens (se o chamado estiver aberto).
+ */
 public class ChatActivity extends AppCompatActivity {
 
+    // Binding do layout do chat
     private ActivityChatBinding binding;
+    // Cliente da API de chat
     private ChatApi chatApi;
+    // Adapter que exibe mensagens
     private ChatAdapter adapter;
+    // Identificador do chamado relacionado
     private int chamadoId;
+    // Flag para saber se o chamado esta fechado
     private boolean chamadoFechado;
 
     @Override
@@ -35,6 +44,7 @@ public class ChatActivity extends AppCompatActivity {
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Recupera dados enviados pela tela anterior
         chamadoId = getIntent().getIntExtra("chamadoId", 0);
         String titulo = getIntent().getStringExtra("titulo");
         chamadoFechado = getIntent().getBooleanExtra("resolvido", false);
@@ -48,6 +58,7 @@ public class ChatActivity extends AppCompatActivity {
         binding.btnSend.setOnClickListener(v -> sendMessage());
         binding.btnBack.setOnClickListener(v -> finish());
 
+        // Se chamado ja foi fechado, desabilita entrada de mensagens
         if (chamadoFechado) {
             binding.btnSend.setEnabled(false);
             binding.inputMessage.setEnabled(false);
@@ -62,6 +73,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void loadMessages() {
+        // Busca historico de mensagens do chamado
         setLoading(true);
         chatApi.listarMensagens(chamadoId).enqueue(new Callback<List<ChatMessageItem>>() {
             @Override
@@ -84,6 +96,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void sendMessage() {
+        // Valida mensagem
         String msg = binding.inputMessage.getText() != null ? binding.inputMessage.getText().toString().trim() : "";
         if (msg.isEmpty()) {
             Ui.toast(this, "Digite uma mensagem");
@@ -96,6 +109,7 @@ public class ChatActivity extends AppCompatActivity {
                 if (!response.isSuccessful()) {
                     Ui.toast(ChatActivity.this, ApiClient.errorConverter().toMessage(response.errorBody(), "Erro ao enviar"));
                 }
+                // Recarrega lista para exibir mensagem recem enviada
                 loadMessages();
             }
 

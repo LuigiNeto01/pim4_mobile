@@ -36,6 +36,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Tela de listagem/gestao de chamados. Permite filtrar, criar, fechar/reabrir e
+ * abrir o chat associado a cada chamado. Usa AI para confirmar abertura.
+ */
 public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapter.Listener {
 
     private static final String[] MOTIVOS = new String[]{
@@ -46,11 +50,17 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
             "Outros"
     };
 
+    // Binding da tela de chamados
     private ActivityChamadosBinding binding;
+    // Cliente da API de chamados
     private ChamadosApi chamadosApi;
+    // Cliente da API de IA (confirmacao/sugestao)
     private AiApi aiApi;
+    // Sessao atual (usado para saber role e dados do usuario)
     private SessionManager session;
+    // Adapter da lista
     private ChamadoAdapter adapter;
+    // Cache dos chamados carregados para aplicar filtros sem nova chamada
     private final List<Chamado> todosChamados = new ArrayList<>();
 
     @Override
@@ -63,6 +73,7 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
         chamadosApi = ApiClient.get(this).create(ChamadosApi.class);
         aiApi = ApiClient.get(this).create(AiApi.class);
 
+        // Configura toolbar e menu superior
         Toolbar toolbar = binding.topAppBar;
         setSupportActionBar(toolbar);
         toolbar.setOnMenuItemClickListener(this::onMenuItemClick);
@@ -84,6 +95,7 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
     }
 
     private boolean onMenuItemClick(@NonNull MenuItem item) {
+        // Navegacao padrao via toolbar
         int id = item.getItemId();
         if (id == R.id.action_dashboard) {
             startActivity(new Intent(this, HomeActivity.class));
@@ -99,8 +111,9 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
             return true;
         }
         if (id == R.id.action_logout) {
+            // Limpa sessao e volta para login
             session.clear();
-            Ui.toast(this, "Sessão encerrada");
+            Ui.toast(this, "Sessao encerrada");
             Intent i = new Intent(this, LoginActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
@@ -110,6 +123,7 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
     }
 
     private void showMenuFromIcon(View anchor) {
+        // Menu de overflow acionado pelo icone de nav
         android.widget.PopupMenu menu = new android.widget.PopupMenu(this, anchor);
         menu.inflate(R.menu.menu_home);
         if (!isAdmin()) {
@@ -130,6 +144,7 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
     }
 
     private void loadChamados() {
+        // Carrega chamados considerando a role do usuario
         setLoading(true);
         boolean isUsuario = "usuario".equalsIgnoreCase(session.getUserRole());
         Call<List<Chamado>> call;
@@ -162,13 +177,14 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
     }
 
     private void showCreateDialog() {
+        // Dialog simples para criar chamado manualmente
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         int pad = (int) (16 * getResources().getDisplayMetrics().density);
         layout.setPadding(pad, pad, pad, 0);
 
         EditText titulo = new EditText(this);
-        titulo.setHint("Título");
+        titulo.setHint("Titulo");
         layout.addView(titulo);
 
         Spinner motivos = new Spinner(this);
@@ -177,13 +193,13 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
         layout.addView(motivos);
 
         EditText desc = new EditText(this);
-        desc.setHint("Descrição (obrigatória em Outros)");
+        desc.setHint("Descricao (obrigatoria em Outros)");
         desc.setVisibility(View.GONE);
         layout.addView(desc);
 
         Spinner prioridades = new Spinner(this);
         ArrayAdapter<String> adapterPrior = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"Crítica (1)", "Alta (2)", "Média (3)", "Baixa (4)"});
+                new String[]{"Critica (1)", "Alta (2)", "Media (3)", "Baixa (4)"});
         prioridades.setAdapter(adapterPrior);
         prioridades.setVisibility(View.GONE);
         layout.addView(prioridades);
@@ -213,7 +229,7 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
             String de = desc.getText().toString().trim();
             boolean outros = "Outros".equalsIgnoreCase(m);
             if (t.isEmpty() || m == null || m.isEmpty()) {
-                Ui.toast(this, "Informe título e motivo");
+                Ui.toast(this, "Informe titulo e motivo");
                 return;
             }
             Integer prioridade = mapPrioridade(m);
@@ -232,6 +248,7 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
     }
 
     private void solicitarConfirmacaoIA(String titulo, String motivo, String descricao, Integer prioridade) {
+        // Monta payload para a IA validar/explicar o chamado
         Map<String, Object> body = new HashMap<>();
         body.put("titulo", titulo);
         body.put("motivo", motivo);
@@ -247,7 +264,7 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
                 setLoading(false);
                 String texto = response.body() != null ? response.body().text : null;
                 if (texto == null || texto.isEmpty()) {
-                    Ui.toast(ChamadosActivity.this, "Não foi possível obter confirmação");
+                    Ui.toast(ChamadosActivity.this, "Nao foi possivel obter confirmacao");
                     return;
                 }
                 mostrarDialogoConfirmacao(texto, titulo, motivo, descricao, prioridade);
@@ -256,7 +273,7 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
             @Override
             public void onFailure(@NonNull Call<AiOpinionResponse> call, @NonNull Throwable t) {
                 setLoading(false);
-                Ui.toast(ChamadosActivity.this, "Falha ao obter confirmação: " + t.getMessage());
+                Ui.toast(ChamadosActivity.this, "Falha ao obter confirmacao: " + t.getMessage());
             }
         });
     }
@@ -271,6 +288,7 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
     }
 
     private Integer mapPrioridade(String motivo) {
+        // Prioridade pre-definida para motivos padrao
         String k = motivo == null ? "" : motivo.toLowerCase();
         if (k.equals("problemas com a internet")) return 1;
         if (k.equals("problema com video")) return 2;
@@ -318,6 +336,7 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
 
     @Override
     public void onClick(Chamado chamado) {
+        // Abre tela de chat passando dados principais
         Intent i = new Intent(this, ChatActivity.class);
         i.putExtra("chamadoId", chamado.id);
         i.putExtra("titulo", chamado.titulo);
@@ -327,6 +346,7 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
 
     @Override
     public void onToggleStatus(Chamado chamado) {
+        // Alterna entre fechar e reabrir chamado
         binding.progress.setVisibility(View.VISIBLE);
         Call<Map<String, Object>> call = chamado.resolvido
                 ? chamadosApi.reabrir(chamado.id)
@@ -352,12 +372,13 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
     }
 
     private void setupFilters() {
+        // Configura spinners de status e prioridade
         ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
                 new String[]{"Todos", "Abertos", "Fechados"});
         binding.spinnerStatus.setAdapter(statusAdapter);
 
         ArrayAdapter<String> priorAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"Todas prioridades", "Crítica (1)", "Alta (2)", "Média (3)", "Baixa (4)"});
+                new String[]{"Todas prioridades", "Critica (1)", "Alta (2)", "Media (3)", "Baixa (4)"});
         binding.spinnerPrioridade.setAdapter(priorAdapter);
 
         android.widget.AdapterView.OnItemSelectedListener listener = new android.widget.AdapterView.OnItemSelectedListener() {
@@ -374,6 +395,7 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
     }
 
     private void aplicarFiltros() {
+        // Aplica filtros selecionados na UI sobre a lista em memoria
         List<Chamado> filtrados = new ArrayList<>();
         String statusSel = (String) binding.spinnerStatus.getSelectedItem();
         String priorSel = (String) binding.spinnerPrioridade.getSelectedItem();
@@ -384,9 +406,9 @@ public class ChamadosActivity extends AppCompatActivity implements ChamadoAdapte
 
             boolean priorOk = true;
             if (priorSel != null) {
-                if (priorSel.startsWith("Crítica")) priorOk = c.prioridade == 1;
+                if (priorSel.startsWith("Critica")) priorOk = c.prioridade == 1;
                 else if (priorSel.startsWith("Alta")) priorOk = c.prioridade == 2;
-                else if (priorSel.startsWith("Média")) priorOk = c.prioridade == 3;
+                else if (priorSel.startsWith("Media")) priorOk = c.prioridade == 3;
                 else if (priorSel.startsWith("Baixa")) priorOk = c.prioridade == 4;
             }
             if (statusOk && priorOk) filtrados.add(c);

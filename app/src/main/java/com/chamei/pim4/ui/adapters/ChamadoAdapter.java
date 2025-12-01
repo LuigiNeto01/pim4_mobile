@@ -14,6 +14,9 @@ import com.chamei.pim4.R;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Adapter que exibe cards de chamados, permitindo abrir detalhes ou alternar status.
+ */
 public class ChamadoAdapter extends RecyclerView.Adapter<ChamadoAdapter.ViewHolder> {
 
     public interface Listener {
@@ -21,6 +24,7 @@ public class ChamadoAdapter extends RecyclerView.Adapter<ChamadoAdapter.ViewHold
         void onToggleStatus(Chamado chamado);
     }
 
+    // Lista de chamados exibidos
     private final List<Chamado> items = new ArrayList<>();
     private final Listener listener;
 
@@ -29,6 +33,7 @@ public class ChamadoAdapter extends RecyclerView.Adapter<ChamadoAdapter.ViewHold
     }
 
     public void setItems(List<Chamado> novos) {
+        // Atualiza a lista inteira (usado apos filtros/reload)
         items.clear();
         if (novos != null) items.addAll(novos);
         notifyDataSetChanged();
@@ -60,6 +65,7 @@ public class ChamadoAdapter extends RecyclerView.Adapter<ChamadoAdapter.ViewHold
         }
 
         void bind(Chamado c) {
+            // Informacoes basicas do chamado
             b.txtTitulo.setText(c.titulo != null ? c.titulo : "Chamado");
             b.txtMotivo.setText(c.motivo != null ? c.motivo : "-");
             setPrioridade(b.txtPrioridade, c.prioridade);
@@ -67,9 +73,11 @@ public class ChamadoAdapter extends RecyclerView.Adapter<ChamadoAdapter.ViewHold
             b.btnStatus.setText(c.resolvido ? "Reabrir" : "Fechar");
             b.txtCriador.setText(c.nomeCriador != null ? c.nomeCriador : "");
 
+            // Abre detalhes/chat ao clicar no card
             b.getRoot().setOnClickListener(v -> {
                 if (listener != null) listener.onClick(c);
             });
+            // Botao para fechar/reabrir
             b.btnStatus.setOnClickListener(v -> {
                 if (listener != null) listener.onToggleStatus(c);
             });
@@ -80,7 +88,7 @@ public class ChamadoAdapter extends RecyclerView.Adapter<ChamadoAdapter.ViewHold
             int color;
             switch (prioridade) {
                 case 1:
-                    label = "Crítica (1)";
+                    label = "Critica (1)";
                     color = view.getContext().getColor(R.color.priority_critica);
                     break;
                 case 2:
@@ -88,7 +96,7 @@ public class ChamadoAdapter extends RecyclerView.Adapter<ChamadoAdapter.ViewHold
                     color = view.getContext().getColor(R.color.priority_alta);
                     break;
                 case 3:
-                    label = "Média (3)";
+                    label = "Media (3)";
                     color = view.getContext().getColor(R.color.priority_media);
                     break;
                 default:

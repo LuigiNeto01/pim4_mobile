@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/chamou_background">
 
+    <!-- Barra superior com menu e titulo -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="0dp"
@@ -20,6 +21,7 @@
         app:title="Chamou!"
         app:titleTextColor="@color/chamou_title" />
 
+    <!-- Conteudo principal rolavel do dashboard -->
     <ScrollView
         android:id="@+id/scrollContent"
         android:layout_width="0dp"
@@ -50,9 +52,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Resumo dos chamados e usuários"
+                android:text="Resumo dos chamados e usuarios"
                 android:textColor="@color/chamou_subtitle" />
 
+            <!-- Cards de contagem de chamados -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -97,7 +100,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Críticos (abertos)"
+                        android:text="Criticos (abertos)"
                         android:textColor="@color/chamou_subtitle" />
                     <TextView
                         android:id="@+id/txtCriticalCount"
@@ -136,6 +139,7 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- Card de distribuicao por prioridade -->
             <LinearLayout
                 android:id="@+id/userCard"
                 android:layout_width="match_parent"
@@ -148,7 +152,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Distribuição por prioridade"
+                    android:text="Distribuicao por prioridade"
                     android:textColor="@color/chamou_title"
                     android:textStyle="bold" />
 
@@ -161,7 +165,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Crítica (1)"
+                        android:text="Critica (1)"
                         android:textColor="@color/chamou_subtitle" />
                     <ProgressBar
                         android:id="@+id/progressCritica"
@@ -193,7 +197,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Média (3)"
+                        android:text="Media (3)"
                         android:textColor="@color/chamou_subtitle" />
                     <ProgressBar
                         android:id="@+id/progressMedia"
@@ -223,6 +227,7 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- Alertas de criticidade/idade dos chamados -->
             <LinearLayout
                 android:id="@+id/alertCritical"
                 android:layout_width="match_parent"
@@ -255,6 +260,7 @@
                     android:textColor="@color/chamou_warning_text" />
             </LinearLayout>
 
+            <!-- Card de estatisticas de usuarios (exibido para admin) -->
             <LinearLayout
                 android:id="@+id/userStatsCard"
                 android:layout_width="match_parent"
@@ -267,7 +273,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Usuários"
+                    android:text="Usuarios"
                     android:textColor="@color/chamou_title"
                     android:textStyle="bold" />
 
@@ -349,12 +355,13 @@
                     android:drawablePadding="8dp"
                     android:paddingTop="12dp"
                     android:paddingBottom="12dp"
-                    android:text="Gerir usuários"
+                    android:text="Gerir usuarios"
                     android:textAllCaps="false"
                     android:textColor="@android:color/white"
                     android:textStyle="bold" />
             </LinearLayout>
 
+            <!-- Lista de chamados recentes e atalho para a tela de chamados -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -396,6 +403,7 @@
         </LinearLayout>
     </ScrollView>
 
+    <!-- Loader central mostrado durante chamadas de rede -->
     <ProgressBar
         android:id="@+id/dashboardProgress"
         android:layout_width="wrap_content"
